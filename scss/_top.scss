@@ -1,0 +1,432 @@
+@use "./mixins" as *;
+
+// リセット
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// 共通設定
+img {
+  // ベースライン下の余白なくなる
+  display: block;
+  max-width: 100%;
+}
+
+body {
+  font-family: var(--font-primary);
+  padding-top: 60px;
+
+  @include mq{
+    padding-top: 0;
+  }
+}
+
+html {
+  font-size: 14px;
+  // rem の単位に影響する
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+// ヘッダー　モバイルファースト
+
+.site-header {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+  // この時点で要素にはばがあっているので下をかく
+  width: 100%;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  // ロゴ &は親セレクタを継承
+  &__logo {
+    img {
+      width: 140px;
+    }
+  }
+  // ナビゲーション
+  &__nav-container {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+  //   PC版
+  @include mq {
+    width: 200px;
+    // 100%でもOK
+    height: 100vh;
+    // ロゴとその他を縦並びに
+    flex-direction: column;
+
+    // ロゴの設定PC
+    &__logo {
+      margin: 40px 0 80px;
+
+      img {
+        width: 160px;
+      }
+    }
+  }
+} // .site-header
+
+// ナビゲーションコンテナ
+.site-nav-container {
+  background-color: #fff;
+  // ナビゲーションとSNSリンクが横並び
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transform: translateX(100%);
+  transition: 0.8s var(--easing);
+
+  .site-nav-checkbox:checked ~ & {
+    transform: translateX(0);
+  }
+
+  // ナビゲーションのスタイリング
+  &__nav {
+    // 文字の中央ぞろえulやliで入れても良い
+    text-align: center;
+    // sitenavconteinaerにあった余白を埋めて伸ばす
+    flex-grow: 1.5;
+    //
+    display: flex;
+    // 今持っている範囲の中で高さを垂直中央ぞろえ
+    align-items: center;
+
+    li {
+      // body14pxの2倍　フォントに対して相対的に大きくなる　文字が大きくなれば変わる
+      margin-bottom: 2em;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    a {
+      color: var(--color-primary);
+      // 下線なくす
+      text-decoration: none;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+    }
+  }
+  //   SNS
+  &__sns {
+    display: flex;
+    // navのhlexgrowによりSNSアイコンの高さがないためここにもつける。余白をnavとsnsに１.5：１で貰い受ける
+    flex-grow: 1;
+
+    a {
+      // aはインライン要素だがblockに変えているのでmarginつけられる
+      margin: 0 8px;
+    }
+  }
+
+  //   PC
+  @include mq {
+    // position:fixedを戻す staticは初期値
+    position: static;
+    transform: translateX(0) !important;
+    //
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    // ナビゲーション
+    &__nav {
+      align-items: flex-start;
+      text-align: start;
+      padding: 0 15px;
+
+      li {
+        margin-bottom: 1.5em;
+      }
+
+      a {
+        // htmlで使用されている１４pxに戻す
+        font-size: 1rem;
+        // aを基準とさせるため
+        position: relative;
+        // 余白をつけるためblockにすると文字と同じ大きさの下線にしにくい
+        display: inline-block;
+        padding-bottom: 3px;
+
+        &::after {
+          content: "";
+          height: 1px;
+          // aの１００％文字と同じ幅になる
+          width: 100%;
+          position: absolute;
+          background-color: var(--color-primary);
+          left: 0;
+          bottom: 0;
+          transform: scaleX(0);
+          // 書かないとallになるので対象をtransformとする。これで下線のアニメーションが正しくなる。複数ある場合はカンマ区切りで増やしてく。transition: transform 0.3s var(--easing);,プロパティ名：。。。 0.3s var(--easing);
+
+          transition: transform 0.4s var(--easing);
+
+          // 右の方にマウスアウトしたときに収縮していく
+          transform-origin: right center;
+        }
+        // aをhoverした後
+        &:hover::after {
+          transform: scaleX(1);
+          // 基準点を変える 左から入ってくるアニメーションになる
+          transform-origin: left center;
+        }
+      }
+    }
+
+    // PCのSNSスタイル　アイコンを中央にして下の方に移動　そのままjustifycontent centerにしても中央にならない。親要素contentのflexstartに紐づいている。まずは要素の幅を１００％にして広げた上で中央ぞろえにする。
+    &__sns {
+      width: 100%;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 30px;
+    }
+  }
+} // .site-nav-container
+
+// ハンバーガーボタン
+.site-nav-toggle {
+  // インライン要素のためfixedをつけて幅高さをつける
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  // htmlで後にくる兄弟要素のsiteheaderが上に来ているのでzindexで上にする
+  z-index: 1;
+  top: 10px;
+  right: 10px;
+
+  // 以下３つはハンバーガーの３本線を中央にするため
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &::before,
+  &::after,
+  span {
+    content: "";
+    height: 1px;
+    width: 30px;
+    background-color: var(--color-primary);
+    // 全員重なり、ブロック要素になるので幅高さがつけられる
+    position: absolute;
+    transition: 0.4s var(--easing);
+  }
+
+  span {
+    // 基準点を基本のcenter centerから変更するためxは左yは中央
+    transform-origin: left center;
+  }
+
+  &::before {
+    // ５０％で真ん中,そこから上に８pxズレる
+    top: calc(50% - 8px);
+  }
+
+  &::after {
+    top: calc(50% + 8px);
+  }
+  // &はsitenavtoggleを＆で
+  .site-nav-checkbox:checked ~ & {
+    span {
+      // 縮む
+      transform: scaleX(0);
+    }
+    &::before {
+      // 高さを中央に戻してから回転かける
+      top: 50%;
+      transform: rotate(45deg);
+    }
+    &::after {
+      top: 50%;
+      transform: rotate(-45deg);
+    }
+  }
+
+  // pcスタイル３本線消す
+  @include mq {
+    display: none;
+  }
+} // sitenavtoggle
+
+.site-nav-checkbox {
+  display: none;
+}
+
+// SPのmain
+main {
+  @include mq{
+    margin-left: 200px;
+  }
+}
+
+
+// SPメインビジュアル
+.main-visual {
+  background: url(../img/mv-bg@2x.jpg) no-repeat;
+  background-size: cover;
+  // 画像中央寄せのため この時点で文字も横に来ている
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // &__title{position: absolute;}を効かせるためのrelative
+  position: relative;
+  height: calc(100vh - 60px);
+
+  // タイトル
+  // 右に来ている文字を画像の上に浮かせる
+  &__title {
+    position: absolute;
+    left: 5%;
+    bottom: 5%;
+
+    span{
+      // blackにするとh２と一緒の幅になる
+      display: inline-block;
+      background-color: #fff;
+      margin-bottom: 8px;
+      padding: 0 5px;
+      font-feature-settings: "palt" 1;
+      font-weight: 400;
+    }
+    // nth-childはbrがあるため使えない
+    span:first-of-type{
+      // 基準は親要素htmlの１４px
+      font-size: 1.2rem;
+    }
+    span:nth-of-type(2),
+    span:nth-of-type(3){
+      font-size: 2rem;
+
+    }
+
+    
+  }
+
+
+  // 表紙
+  // width:80% max-width:500px; ⇨こちらに書き換えられるどちらか小さい値でwidth:min(80%,500px),clamp(min,中間値(相対値が良い)max)
+  &__cover {
+    width: min(80%, 400px);
+    filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.15));
+    
+  }
+
+  // pc
+  @include mq{
+    height: 100vh;  
+
+    &__cover{
+      height: 80vh;
+      // 幅は高さに合わせて収縮するようになる
+      width: auto;
+    }
+  }
+} // .main-visual
+
+// バックナンバー
+.backnumbers{
+  // 見出し
+  &__title{
+    // 基準はhtmlの１４px
+    font-size: 0.8rem;
+    font-weight: normal;
+    padding: 20px;
+    background-color: #f8f8f8;
+
+    &::first-line{
+      // 基準はhtmlの１４px
+      font-size: 1.5rem;
+      text-transform: uppercase;
+    }
+  }
+
+  // バックナンバーリスト
+  &__list{
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  
+}// .backnumbers
+
+// バックナンバーアイテム
+.backnumber-item{
+  // flex-basis:100%;でも良い
+  width: 100%;
+  padding: 40px 20px;
+
+  a{
+    text-decoration: none;
+    color: var(--color-primary);
+  }
+
+  &__cover{
+    max-width: 300px;
+    width: 65%;
+    margin: 0 auto;
+    // 影の掛け合わせ。メインの影の周りにぼやっとした影をさらに追加する。カンマ区切り
+    box-shadow: 0 0 5px rgba(0,0,0,.2),
+    0 0 15px rgba(0,0,0,.15);
+  }
+&__meta{
+  margin-top: 40px;
+
+  span{
+    // 縦並びにするため
+    display: block;
+  }
+  span:first-of-type,
+  span:nth-of-type(2){
+    font-weight: 300;
+    margin-bottom: 8px;
+  }
+  span:nth-of-type(3){
+    font-size: 1.4rem;
+  }
+}
+
+// PC
+@include mq{
+  // flex-basis:50%;でもOK
+  width: 50%;
+}
+
+}// .backnumber-item
+
+.backnumber {
+  &-101{
+    background-color: #ecf4f9;
+  }
+  &-100{
+    background-color: #fbf3d2;
+  }
+  &-99{
+    background-color: #f9f2eb;
+  }
+  &-98{
+    background-color: #fae8c2;
+  }
+  &-97{
+    background-color: #e2efe7;
+  }
+  &-96{
+    background-color: #f2f5fb;
+  }
+}

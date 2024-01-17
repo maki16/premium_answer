@@ -1,0 +1,21 @@
+// メディアクエリ７６８px
+@mixin mq{
+    @media screen and (min-width: 768px){
+        @content;
+
+    }
+        
+    }
+
+
+// 使い方
+    // @inclide mq{
+    //     .selector{
+    //         width:100%;
+    //     }
+    // }
+
+    // .selector{
+    //     @include mq
+    // }
+   

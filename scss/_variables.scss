@@ -1,0 +1,7 @@
+// よく使用する数値を記載
+// 欧文フォントは日本語フォントより先にかく
+:root{
+    --font-primary:'Radio Canada','Noto Sans JP',sans-serif;
+    --color-primary:#000;
+    --easing:cubic-bezier(.69,0,.18,1)
+}
