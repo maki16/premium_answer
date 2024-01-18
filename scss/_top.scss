@@ -295,23 +295,41 @@ main {
     position: absolute;
     left: 5%;
     bottom: 5%;
+    // 子要素spanが影響する
+    display: flex;
+    flex-direction: column;
+    // ストレッチがかからないように、左が交差軸のスタート
+    align-items: flex-start;
 
-    span{
+    // .クラス名>span
+    >span{
       // blackにするとh２と一緒の幅になる
-      display: inline-block;
+      // titleをflexにしたことによりblockになったので消す
+      // display: inline-block;
       background-color: #fff;
       margin-bottom: 8px;
       padding: 0 5px;
       font-feature-settings: "palt" 1;
       font-weight: 400;
+      animation: mv-title 1s both var(--easing);
+      // 中央から伸びてしまっているので左から伸びるように以下記入
+      transform-origin: left center;
+      overflow: hidden;
+    }
+    // spanの中のspan
+    // 2個目の１sは遅延秒数
+    >span span{
+      animation: mv-title-inside 1s 1s both var(--easing);
+      // transformを効かせるため
+      display: block;
     }
     // nth-childはbrがあるため使えない
-    span:first-of-type{
+    >span:first-of-type{
       // 基準は親要素htmlの１４px
       font-size: 1.2rem;
     }
-    span:nth-of-type(2),
-    span:nth-of-type(3){
+    >span:nth-of-type(2),
+    >span:nth-of-type(3){
       font-size: 2rem;
 
     }
@@ -319,12 +337,31 @@ main {
     
   }
 
+  @keyframes mv-title{
+    0%{
+      transform: scaleX(0);
+    }
+    100%{
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes mv-title-inside{
+    0%{
+      transform: translateY(100%);
+    }
+
+    100%
+    {
+      transform: translateY(0);
+    }
+  }
 
   // 表紙
   // width:80% max-width:500px; ⇨こちらに書き換えられるどちらか小さい値でwidth:min(80%,500px),clamp(min,中間値(相対値が良い)max)
   &__cover {
     width: min(80%, 400px);
-    filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.15));
+    filter: drop-shadow(5px 5px 10px rgba(0,0,0,.15));
     
   }
 
